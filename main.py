@@ -2,7 +2,7 @@ import os
 import asyncio
 from typing import Any, Dict, Tuple
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from uvicorn import Config, Server
 
 from amqp import MQConsumer, MQPublisher
@@ -27,8 +27,12 @@ def create_server(
 
     @app.post("/tasks", status_code=201)
     async def create_task(data: Dict[str, Any]):
-        await task_service.create_task(data)
-        return {"message": f"task {data} is queued"}
+        document, is_created = await task_service.create_task(data)
+
+        if is_created:
+            raise HTTPException(409, {"message": document})
+        else:
+            return {"message": f"task {data} is queued"}
 
     config = Config(app=app, loop=loop)
     return Server(config)

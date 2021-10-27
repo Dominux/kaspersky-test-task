@@ -1,6 +1,6 @@
 import asyncio
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 
 from store import BaseStore
 from amqp import MQPublisher
@@ -12,12 +12,19 @@ class TaskService:
         self._publisher = publisher
         self._collection = collection
 
-    async def create_task(self, data: Dict[str, Any]) -> None:
+    async def create_task(self, data: Dict[str, Any]) -> Tuple[Dict[str, Any], bool]:
         """
-            Main logic of server
+            Main server's logic
         """
+
+        # Emulating data processing
         await asyncio.sleep(1)
+
         start_time = datetime.now()
         document = dict(**data, start_time=start_time, status="Waiting")
-        await self._store.put(self._collection, document)
-        await self._publisher.publish(data)
+        document, is_created = await self._store.get_or_put(self._collection, document)
+
+        if is_created:
+            await self._publisher.publish(data)
+
+        return document, is_created

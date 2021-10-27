@@ -21,7 +21,10 @@ class RobotWorker:
         """
             Main logic of robot
         """
+
+        # Emulating data processing
         await asyncio.sleep(1)
+
         finish_time = datetime.now()
         document = {
             "task_id": message,
