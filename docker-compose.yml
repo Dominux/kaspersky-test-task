@@ -3,11 +3,11 @@ services:
 
   application:
     build: .
-    command: "pytest"
     depends_on:
       - broker
       - database
     env_file:
+      - dev.env
       - test.env
     environment:
       PYTHONDEVMODE: 1

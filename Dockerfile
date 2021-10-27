@@ -6,3 +6,4 @@ COPY . .
 RUN python -m pip --no-cache-dir install --upgrade pip \
     && python -m pip --no-cache-dir install --requirement requirements.txt \
     && rm requirements.txt
+CMD [ "pytest" ]

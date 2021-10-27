@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional, Tuple
 class BaseStore(ABC):
 
     @abstractmethod
-    async def get(self, collection: str, **filters) -> Optional[Dict[str, Any]]:
+    async def get_object(self, collection: str, **filters) -> Optional[Dict[str, Any]]:
         pass
     
     @abstractmethod
@@ -17,5 +17,5 @@ class BaseStore(ABC):
         self, 
         collection: str, 
         document: Dict[str, Any]
-    ) -> Tuple[bool, Dict[str, Any]]:
+    ) -> Tuple[Dict[str, Any], bool]:
         pass

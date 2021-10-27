@@ -24,10 +24,10 @@ class MongoStore(BaseStore):
         """
             Trying to get the object, and if it doesn't exist - we create it
         """
-        document = await self.get_object(collection, task_id=document["data"])
+        new_document = await self.get_object(collection, task_id=document["task_id"])
 
-        if document:
-            return document, False
+        if new_document:
+            return new_document, False
         else:
             await self.put(collection, document)
             return document, True

@@ -20,7 +20,7 @@ class MQPublisher(MQBase):
 
     async def start(self):
         self.connection = await aio_pika.connect_robust(
-            **self.amqp_settings, url=None, loop=self.loop
+            **self.amqp_settings, loop=self.loop
         )
 
     async def stop(self):

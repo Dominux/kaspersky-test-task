@@ -11,6 +11,10 @@ from server_services import TaskService
 from store import MongoStore, BaseStore
 
 
+def get_setting(name: str, prefix: str = ""):
+    return os.getenv(f"{prefix}{name}")
+
+
 def create_server(
     loop: asyncio.AbstractEventLoop,
     store: BaseStore,
@@ -25,14 +29,25 @@ def create_server(
 
     app = FastAPI()
 
+    @app.on_event("startup")
+    async def startup():
+        await task_service._publisher.start()
+
     @app.post("/tasks", status_code=201)
     async def create_task(data: Dict[str, Any]):
         document, is_created = await task_service.create_task(data)
 
         if is_created:
-            raise HTTPException(409, {"message": document})
-        else:
             return {"message": f"task {data} is queued"}
+        else:
+
+            # TODO: Сделай блять норм подготовку данных для отдачи, даун!
+            #       Тут еще кстате datetime поле несереалайзбл, так что я бы тебе посоветовал заюзать всё-таки верный подход с pydantic
+            # Excluding '_id' field, at least because it's not serializable
+            document = {k: v for k, v in document.items() if k != "_id"}
+
+            breakpoint()
+            raise HTTPException(409, {"message": document})
 
     config = Config(app=app, loop=loop)
     return Server(config)
@@ -42,15 +57,18 @@ def create_robot(store: BaseStore, consumer: MQConsumer, collection: str) -> Rob
     return RobotWorker(store=store, consumer=consumer, collection=collection)
 
 
-def create_app(loop: asyncio.AbstractEventLoop) -> Tuple[Server, RobotWorker]:
+def create_app(
+    loop: asyncio.AbstractEventLoop, 
+    prefix: str = ""
+) -> Tuple[Server, RobotWorker]:
     """ Creating server and robot """
     store = MongoStore(
-        connection_uri=os.getenv("MONGO_URI"),
-        database=os.getenv("MONGO_DBNAME"),
+        connection_uri=get_setting("MONGO_URI", prefix),
+        database=get_setting("MONGO_DBNAME", prefix),
     )
     publisher = MQPublisher(
-        queue_name=os.getenv("QUEUE_NAME"),
-        amqp_settings={"url": os.getenv("AMQP_URI")},
+        queue_name=get_setting("QUEUE_NAME", prefix),
+        amqp_settings={"url": get_setting("AMQP_URI", prefix)},
         loop=loop,
     )
     consumer = MQConsumer(
@@ -58,7 +76,7 @@ def create_app(loop: asyncio.AbstractEventLoop) -> Tuple[Server, RobotWorker]:
         amqp_settings=publisher.amqp_settings,
         loop=loop
     )
-    collection = os.getenv("MONGO_COLLECTION")
+    collection = get_setting("MONGO_COLLECTION", prefix)
 
     server = create_server(
         loop=loop, 

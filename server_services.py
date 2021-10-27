@@ -21,7 +21,7 @@ class TaskService:
         await asyncio.sleep(1)
 
         start_time = datetime.now()
-        document = dict(**data, start_time=start_time, status="Waiting")
+        document = dict(task_id=data, start_time=start_time, status="Waiting")
         document, is_created = await self._store.get_or_put(self._collection, document)
 
         if is_created:
