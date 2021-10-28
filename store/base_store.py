@@ -16,7 +16,8 @@ class BaseStore(ABC):
     async def get_or_create(
         self, 
         collection: str, 
-        document: Dict[str, Any]
+        document: Dict[str, Any],
+        **filters: Any
     ) -> Tuple[Dict[str, Any], bool]:
         pass
 

@@ -19,12 +19,13 @@ class MongoStore(BaseStore):
     async def get_or_create(
         self, 
         collection: str, 
-        document: Dict[str, Any]
+        document: Dict[str, Any],
+        **filters: Any
     ) -> Tuple[Dict[str, Any], bool]:
         """
             Trying to get the object, and if it doesn't exist - we create it
         """
-        existed = await self.get_object(collection, task_id=document["task_id"])
+        existed = await self.get_object(collection, **filters)
 
         if existed:
             return existed, False
