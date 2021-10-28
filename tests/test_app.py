@@ -1,4 +1,3 @@
-import time
 import asyncio
 from typing import Any, Dict, Tuple
 
@@ -50,7 +49,7 @@ async def test_app(app: Tuple[Server, RobotWorker]):
     response = await _make_post_request(DATA)
 
     assert response.is_success
-    assert Task.parse_raw(response.json()) == Task(**task)
+    assert Task.parse_obj(response.json()["message"]) == Task(**task)
     
     # Making another request with another data
     await _test_creating(ANOTHER_DATA, robot)

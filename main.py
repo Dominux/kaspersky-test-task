@@ -1,8 +1,10 @@
 import os
 import asyncio
+import json
 from typing import Any, Dict, Tuple
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse, JSONResponse
 from uvicorn import Config, Server
 
 from amqp import MQConsumer, MQPublisher
@@ -35,16 +37,25 @@ def create_server(
         # Starting publisher connection
         await task_service._publisher.start()
 
-    @app.post("/tasks")
+    @app.get("/tasks")
+    async def task_form():
+        """ Getting tasks html form """
+        with open("templates/tasks/form.html", "r") as f:
+            return HTMLResponse(f.read())
+
+    @app.post("/tasks", status_code=201)
     async def create_task(data: Dict[str, Any]):
         document, is_created = await task_service.create_task(data)
-        return (
-            {"message": f"task {data} is queued"} 
-                if is_created 
-                else Task(**document).json()
-        )
 
-    config = Config(app=app, loop=loop)
+        if is_created:
+            return {"message": f"task {data} is queued"} 
+        else:
+            return JSONResponse(
+                status_code=200, 
+                content={"message": json.loads(Task(**document).json())}
+            )
+
+    config = Config(app=app, loop=loop, host="0.0.0.0")
     return Server(config)
 
 
@@ -86,9 +97,7 @@ def create_app(
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-
     server, robot = create_app(loop)   
-
     loop.run_until_complete(
         asyncio.gather(server.serve(), robot.start())
     )

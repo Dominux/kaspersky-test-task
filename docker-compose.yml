@@ -3,9 +3,7 @@ services:
 
   application:
     build: .
-    command: >
-      pytest
-      && python ./main.py
+    command: python ./main.py
     depends_on:
       - broker
       - database
