@@ -9,6 +9,7 @@ from amqp import MQConsumer, MQPublisher
 from robot_worker import RobotWorker
 from server_services import TaskService
 from store import MongoStore, BaseStore
+from models import Task
 
 
 def get_setting(name: str, prefix: str = ""):
@@ -31,23 +32,17 @@ def create_server(
 
     @app.on_event("startup")
     async def startup():
+        # Starting publisher connection
         await task_service._publisher.start()
 
-    @app.post("/tasks", status_code=201)
+    @app.post("/tasks")
     async def create_task(data: Dict[str, Any]):
         document, is_created = await task_service.create_task(data)
-
-        if is_created:
-            return {"message": f"task {data} is queued"}
-        else:
-
-            # TODO: Сделай блять норм подготовку данных для отдачи, даун!
-            #       Тут еще кстате datetime поле несереалайзбл, так что я бы тебе посоветовал заюзать всё-таки верный подход с pydantic
-            # Excluding '_id' field, at least because it's not serializable
-            document = {k: v for k, v in document.items() if k != "_id"}
-
-            breakpoint()
-            raise HTTPException(409, {"message": document})
+        return (
+            {"message": f"task {data} is queued"} 
+                if is_created 
+                else Task(**document).json()
+        )
 
     config = Config(app=app, loop=loop)
     return Server(config)
@@ -101,6 +96,4 @@ if __name__ == '__main__':
     try:
         loop.run_forever()
     except KeyboardInterrupt:
-        loop.run_until_complete(
-            asyncio.gather(server.shutdown(), robot.stop())
-        )
+        loop.run_until_complete(robot.stop())

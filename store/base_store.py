@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class BaseStore(ABC):
@@ -9,13 +9,22 @@ class BaseStore(ABC):
         pass
     
     @abstractmethod
-    async def put(self, collection: str, document: Dict[str, Any]) -> Any:
+    async def create(self, collection: str, document: Dict[str, Any]) -> Any:
         pass
 
     @abstractmethod
-    async def get_or_put(
+    async def get_or_create(
         self, 
         collection: str, 
         document: Dict[str, Any]
     ) -> Tuple[Dict[str, Any], bool]:
+        pass
+
+    @abstractmethod
+    async def update(
+        self, 
+        collection: str, 
+        document: Dict[str, Any],
+        **filters: Any
+    ) -> None:
         pass

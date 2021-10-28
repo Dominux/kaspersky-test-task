@@ -14,16 +14,12 @@ class MQConsumer(MQBase):
         queue_name: str, 
         prefetch_count: Optional[int] = 1,
         loop: Optional[asyncio.BaseEventLoop] = None,
-        connect_attempts: int = 3,
-        connect_attempt_timeout: int = 10,
         **queue_declaration: Union[str, Dict[str, Any]]
     ):
         super().__init__(amqp_settings, queue_name, loop)
         self.prefetch_count = prefetch_count
 
         self.queue_declaration = queue_declaration
-        self.connect_attempts = connect_attempts
-        self.connect_attempt_timeout = connect_attempt_timeout
 
         self.handler: Callable
         self.connection: aio_pika.Connection

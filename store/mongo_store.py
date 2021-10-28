@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import motor.motor_asyncio
 
@@ -7,16 +7,16 @@ from .base_store import BaseStore
 
 class MongoStore(BaseStore):
     def __init__(self, connection_uri: str, database: str) -> None:
-        self.client = motor.motor_asyncio.AsyncIOMotorClient(connection_uri)
-        self.db = self.client[database]
+        self._client = motor.motor_asyncio.AsyncIOMotorClient(connection_uri)
+        self._db = self._client[database]
 
     async def get_object(self, collection: str, **filters) -> Optional[Dict[str, Any]]:
-        return await self.db[collection].find_one(filters)
+        return await self._db[collection].find_one(filters)
 
-    async def put(self, collection: str, document: Dict[str, Any]) -> Any:
-        return await self.db[collection].insert_one(document)
+    async def create(self, collection: str, document: Dict[str, Any]) -> Any:
+        return await self._db[collection].insert_one(document)
 
-    async def get_or_put(
+    async def get_or_create(
         self, 
         collection: str, 
         document: Dict[str, Any]
@@ -24,10 +24,20 @@ class MongoStore(BaseStore):
         """
             Trying to get the object, and if it doesn't exist - we create it
         """
-        new_document = await self.get_object(collection, task_id=document["task_id"])
+        existed = await self.get_object(collection, task_id=document["task_id"])
 
-        if new_document:
-            return new_document, False
+        if existed:
+            return existed, False
         else:
-            await self.put(collection, document)
+            await self.create(collection, document)
             return document, True
+
+    async def update(
+        self, 
+        collection: str, 
+        document: Dict[str, Any],
+        **filters: Any
+    ) -> None:
+        document_setter = {"$set": document}
+        await self._db[collection].update_one(filters, document_setter)
+    

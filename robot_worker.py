@@ -31,7 +31,8 @@ class RobotWorker:
             "finish_time": finish_time,
             "status": "Done",
         }
-        await self._store.put(
+        await self._store.update(
             collection=self._collection, 
-            document=document
+            document=document,
+            task_id=document["task_id"]
         )
