@@ -13,15 +13,6 @@ class BaseStore(ABC):
         pass
 
     @abstractmethod
-    async def get_or_create(
-        self, 
-        collection: str, 
-        document: Dict[str, Any],
-        **filters: Any
-    ) -> Tuple[Dict[str, Any], bool]:
-        pass
-
-    @abstractmethod
     async def update(
         self, 
         collection: str, 

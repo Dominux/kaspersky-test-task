@@ -31,21 +31,20 @@ class TaskService:
             Main server's logic
         """
 
+        # Check whether document already exists
+        if document := await self._store.get_object(self._collection, task_id=data):
+            return document, False
+
         # Emulating data processing
         await asyncio.sleep(self._procesing_time)
 
+        # Creating document, storing it and publishing data to the robot
         start_time = datetime.now()
         document = dict(task_id=data, start_time=start_time, status="Waiting")
-        document, is_created = await self._store.get_or_create(
-            self._collection, 
-            document,
-            task_id=document["task_id"]
-        )
+        await self._store.create(self._collection, document)
+        await self._publisher.publish(data)
 
-        if is_created:
-            await self._publisher.publish(data)
-
-        return document, is_created
+        return document, True
 
 
 def create_server(

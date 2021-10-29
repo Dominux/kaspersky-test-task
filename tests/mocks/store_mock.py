@@ -21,20 +21,6 @@ class StoreMock(BaseStore):
     async def create(self, collection: str, document: Dict[str, Any]) -> Any:
         self._store[collection].append(document)
 
-    async def get_or_create(
-        self, 
-        collection: str, 
-        document: Dict[str, Any],
-        **filters: Any
-    ) -> Tuple[Dict[str, Any], bool]:
-        existed = await self.get_object(collection, **filters)
-
-        if existed:
-            return existed, False
-        else:
-            await self.create(collection, document)
-            return document, True
-
     async def update(
         self, 
         collection: str, 

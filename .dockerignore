@@ -1,0 +1,12 @@
+README.md
+.gitignore
+.dockerignore
+
+# cache
+__pycache__
+.pytest_cache
+
+# Env
+env
+venv
+kaspersky_env

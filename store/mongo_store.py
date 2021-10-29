@@ -16,23 +16,6 @@ class MongoStore(BaseStore):
     async def create(self, collection: str, document: Dict[str, Any]) -> Any:
         return await self._db[collection].insert_one(document)
 
-    async def get_or_create(
-        self, 
-        collection: str, 
-        document: Dict[str, Any],
-        **filters: Any
-    ) -> Tuple[Dict[str, Any], bool]:
-        """
-            Trying to get the object, and if it doesn't exist - we create it
-        """
-        existed = await self.get_object(collection, **filters)
-
-        if existed:
-            return existed, False
-        else:
-            await self.create(collection, document)
-            return document, True
-
     async def update(
         self, 
         collection: str, 
