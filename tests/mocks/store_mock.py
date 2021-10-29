@@ -6,7 +6,7 @@ class StoreMock(BaseStore):
     """
         Store Mock
     """
-    async def __init__(self, *collections: str) -> None:
+    def __init__(self, *collections: str) -> None:
         self._store: Dict[str, List[str, Any]] = {collection: [] for collection in collections}
 
     async def get_object(
@@ -41,6 +41,6 @@ class StoreMock(BaseStore):
         document: Dict[str, Any], 
         **filters: Any
     ) -> None:
-        for i, doc in self._store[collection]:
+        for i, doc in enumerate(self._store[collection]):
             if all(doc[k] == v for k, v in filters.items()):
                 self._store[collection][i].update(**document)

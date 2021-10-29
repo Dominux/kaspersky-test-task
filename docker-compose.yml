@@ -9,7 +9,6 @@ services:
       - database
     env_file:
       - dev.env
-      - test.env
     environment:
       PYTHONDEVMODE: 1
     ports:

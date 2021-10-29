@@ -10,6 +10,7 @@ class RobotWorker:
         self._consumer = consumer
         self._store = store
         self._collection = collection
+        self.proccesing_time = 10
 
     async def start(self):
         await self._consumer.start(self.handle)
@@ -23,7 +24,7 @@ class RobotWorker:
         """
 
         # Emulating data processing
-        await asyncio.sleep(1)
+        await asyncio.sleep(self.proccesing_time)
 
         finish_time = datetime.now()
         document = {

@@ -1,5 +1,6 @@
 from typing import Any, Callable, Coroutine, Dict, List, NewType, Optional
 
+from amqp import MQConsumer, MQPublisher
 from abstracts import AsyncAbstractObserver, AsyncAbstractObservable
 
 
@@ -31,13 +32,13 @@ class QueueMock(AsyncAbstractObservable, AsyncAbstractObserver):
             await self.notify(message)
 
 
-class MQPublisherMock(AsyncAbstractObservable):
+class MQPublisherMock(MQPublisher, AsyncAbstractObservable):
     """
         Mock MQPublisher
     """
 
     def __init__(self, queue: QueueMock, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(AsyncAbstractObservable, self).__init__(*args, **kwargs)
 
         self.queue = queue
         self.queue_name = queue.name
@@ -52,13 +53,13 @@ class MQPublisherMock(AsyncAbstractObservable):
         await self.notify(message)
 
 
-class MQConsumerMock(AsyncAbstractObserver):
+class MQConsumerMock(MQConsumer, AsyncAbstractObserver):
     """
         Mock MQConsumer
     """
 
     def __init__(self, queue: QueueMock, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(AsyncAbstractObserver, self).__init__(*args, **kwargs)
 
         self.queue = queue
         self.queue_name = queue

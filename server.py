@@ -1,5 +1,6 @@
 import asyncio
 import json
+import numbers
 from datetime import datetime
 from typing import Any, Dict, Tuple
 
@@ -13,10 +14,17 @@ from models import Task
 
 
 class TaskService:
-    def __init__(self, store: BaseStore, publisher: MQPublisher, collection: str) -> None:
+    def __init__(
+        self, 
+        store: BaseStore, 
+        publisher: MQPublisher, 
+        collection: str,
+        processing_time: numbers.Number
+    ) -> None:
         self._store = store
         self._publisher = publisher
         self._collection = collection
+        self._procesing_time = processing_time
 
     async def create_task(self, data: Dict[str, Any]) -> Tuple[Dict[str, Any], bool]:
         """
@@ -24,7 +32,7 @@ class TaskService:
         """
 
         # Emulating data processing
-        await asyncio.sleep(1)
+        await asyncio.sleep(self._procesing_time)
 
         start_time = datetime.now()
         document = dict(task_id=data, start_time=start_time, status="Waiting")
@@ -46,11 +54,13 @@ def create_server(
     publisher: MQPublisher,
     collection: str,
     host: str,
+    processing_time: numbers.Number
 ) -> Server:
     task_service = TaskService(
         store=store, 
         publisher=publisher, 
-        collection=collection
+        collection=collection,
+        processing_time=processing_time
     )
 
     app = FastAPI()
