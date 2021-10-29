@@ -19,16 +19,7 @@ class MQPublisher(MQBase):
         self.connection: aio_pika.Connection
 
     async def start(self):
-        # Trying to connect
-        for attempt in range(self.connect_attempts):
-            try:
-                self.connection = await aio_pika.connect_robust(
-                    loop=self.loop, **self.amqp_settings
-                )
-            except ConnectionError as error:
-                if attempt == self.connect_attempts - 1:
-                    raise error
-                await asyncio.sleep(self.connect_attempt_timeout)
+        await self._attempt_to_connect()
 
     async def stop(self):
         await self.connection.close()

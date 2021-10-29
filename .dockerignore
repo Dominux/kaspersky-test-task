@@ -2,6 +2,9 @@ README.md
 .gitignore
 .dockerignore
 
+# Assets
+assets
+
 # cache
 __pycache__
 .pytest_cache
