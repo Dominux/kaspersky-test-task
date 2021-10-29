@@ -1,0 +1,20 @@
+version: "3.8"
+services:
+
+  application:
+    build: .
+    command: python ./main.py
+    depends_on:
+      - broker
+      - database
+    env_file:
+      - dev.env
+    environment:
+      PYTHONDEVMODE: 1
+    ports:
+      - 8000:8000
+
+  broker:
+    image: rabbitmq:3.9.3-management-alpine
+  database:
+    image: mongo
